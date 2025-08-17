@@ -27,9 +27,3 @@ Clone this repository or download the files.
 Open your terminal or command prompt and navigate to the project folder.
 
 Run any of the programs using the python command:
-
-# Example for the guessing game
-python guessing_game.py
-
-# Example for the grid parser
-python grid_parser.py
