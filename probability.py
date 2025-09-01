@@ -1,87 +1,136 @@
-# Title: Basic Probability Notation Demonstration
-# Description: This script explains and shows basic probability concepts
-# using a simple die-rolling experiment.
+#Title: Interactive Probability Calculator
+# Description: This script allows a user to choose an experiment (die roll or card draw)
+# and define an event to calculate its probability.
 
-# --- 1. Define the Experiment and Sample Space ---
+import re # Using regex for cleaner input parsing
 
-# An "outcome" is a single possible result of an experiment.
-# The "sample space" (often denoted as S) is the set of all possible outcomes.
+def calculate_probability(event_outcomes, sample_space):
+    """Calculates and returns the probability of an event."""
+    event_count = len(event_outcomes)
+    total_count = len(sample_space)
+    
+    if total_count == 0:
+        return 0.0, 0, 0
+        
+    probability = event_count / total_count
+    return probability, event_count, total_count
 
-# Our experiment is rolling a single, fair six-sided die.
-# The set of all possible outcomes (the sample space) is {1, 2, 3, 4, 5, 6}.
-sample_space = {1, 2, 3, 4, 5, 6}
-total_outcomes_count = len(sample_space)
+def handle_dice_experiment():
+    """Handles the logic for the die-rolling experiment."""
+    print("\n--- Rolling a Single Six-Sided Die ---")
+    sample_space_dice = {1, 2, 3, 4, 5, 6}
+    print(f"The sample space (all possible outcomes) is: {sorted(list(sample_space_dice))}")
+    
+    while True:
+        try:
+            # Get user input for the event outcomes
+            user_input_str = input("\nEnter the outcomes for your event, separated by commas (e.g., 2, 4, 6): ")
+            
+            # Use regex to find all numbers in the string
+            outcomes_str = re.findall(r'\d+', user_input_str)
+            
+            # Convert string numbers to integers
+            user_event_outcomes = {int(num) for num in outcomes_str}
+            
+            # Validate that the user's outcomes are actually in the sample space
+            if not user_event_outcomes.issubset(sample_space_dice):
+                print("Error: One or more of your chosen outcomes are not valid for a six-sided die (1-6). Please try again.")
+                continue
+            
+            # Calculate probability
+            prob, event_n, total_n = calculate_probability(user_event_outcomes, sample_space_dice)
+            
+            # Display results
+            print("\n--- Result ---")
+            print(f"Your defined event is: {sorted(list(user_event_outcomes))}")
+            print(f"Number of outcomes in your event: {event_n}")
+            print(f"Total outcomes in sample space: {total_n}")
+            print(f"The probability of your event is: {event_n}/{total_n} = {prob:.2%}") # Display as percentage
+            break # Exit the loop after successful calculation
+            
+        except (ValueError, TypeError):
+            print("Invalid input. Please enter numbers separated by commas.")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
+def handle_cards_experiment():
+    """Handles the logic for the card-drawing experiment."""
+    print("\n--- Drawing a Single Card from a Standard 52-Card Deck ---")
+    
+    # Create the sample space for a deck of cards
+    ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+    suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+    sample_space_cards = {f"{rank} of {suit}" for rank in ranks for suit in suits}
+    
+    # Present user with choices
+    print("Choose the type of event you want to calculate the probability for:")
+    print("  1. Drawing a specific suit (e.g., all Hearts)")
+    print("  2. Drawing a specific rank (e.g., all Kings)")
+    print("  3. Drawing any face card (Jack, Queen, or King)")
+    
+    while True:
+        choice = input("Enter your choice (1, 2, or 3): ")
+        user_event_outcomes = set()
+        event_description = ""
+
+        if choice == '1':
+            suit_choice = input("Enter the suit (Hearts, Diamonds, Clubs, or Spades): ").strip().title()
+            if suit_choice in suits:
+                user_event_outcomes = {card for card in sample_space_cards if suit_choice in card}
+                event_description = f"drawing any card of the suit '{suit_choice}'"
+                break
+            else:
+                print("Invalid suit. Please enter one of the four suits.")
+        
+        elif choice == '2':
+            rank_choice = input("Enter the rank (e.g., 7, King, Ace): ").strip().title()
+            if rank_choice in ranks:
+                user_event_outcomes = {card for card in sample_space_cards if card.startswith(rank_choice)}
+                event_description = f"drawing a card with the rank '{rank_choice}'"
+                break
+            else:
+                print("Invalid rank. Please check your spelling and try again.")
+
+        elif choice == '3':
+            face_cards = {'Jack', 'Queen', 'King'}
+            user_event_outcomes = {card for card in sample_space_cards if card.split()[0] in face_cards}
+            event_description = "drawing any face card (Jack, Queen, or King)"
+            break
+            
+        else:
+            print("Invalid choice. Please enter 1, 2, or 3.")
+
+    # Calculate and display results for the card experiment
+    prob, event_n, total_n = calculate_probability(user_event_outcomes, sample_space_cards)
+    print("\n--- Result ---")
+    print(f"The event is: {event_description}.")
+    # print(f"Outcomes in this event: {sorted(list(user_event_outcomes))}") # Optional: uncomment to see all cards
+    print(f"Number of outcomes in this event: {event_n}")
+    print(f"Total outcomes in sample space (a full deck): {total_n}")
+    print(f"The probability of this event is: {event_n}/{total_n} = {prob:.2%}")
 
 
-# --- 2. Define Events ---
+def main():
+    """Main function to run the interactive program."""
+    print("Welcome to the Interactive Probability Calculator!")
+    while True:
+        print("\nWhich experiment would you like to run?")
+        print("  1. Roll a Die")
+        print("  2. Draw a Card")
+        print("  3. Quit")
+        
+        user_choice = input("Please enter your choice (1, 2, or 3): ")
+        
+        if user_choice == '1':
+            handle_dice_experiment()
+        elif user_choice == '2':
+            handle_cards_experiment()
+        elif user_choice == '3':
+            print("Thank you for using the probability calculator. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please select a valid option.")
 
-# An "event" is a specific set of one or more outcomes from the sample space that we are interested in.
-# It is a subset of the sample space.
-
-# Event A: The outcome is an even number.
-event_a_outcomes = {2, 4, 6}
-event_a_count = len(event_a_outcomes)
-
-# Event B: The outcome is a number greater than 4.
-event_b_outcomes = {5, 6}
-event_b_count = len(event_b_outcomes)
-
-# Event C: The outcome is exactly 3.
-# This is an example of an event with a single outcome.
-event_c_outcomes = {3}
-event_c_count = len(event_c_outcomes)
-
-
-# --- 3. Calculate Probability Value ---
-
-# The "probability value" of an event is a number between 0 and 1 (inclusive)
-# that represents the likelihood of that event occurring.
-#
-# The formula for the probability of an event (E) is:
-# P(E) = (Number of outcomes in the event) / (Total number of outcomes in the sample space)
-
-def calculate_probability(event_outcome_count, total_sample_count):
-    """
-    Calculates the probability of an event.
-    Args:
-        event_outcome_count (int): The number of favorable outcomes for the event.
-        total_sample_count (int): The total number of outcomes in the sample space.
-    Returns:
-        float: The probability value, or 0 if the sample space is empty.
-    """
-    if total_sample_count == 0:
-        return 0
-    return event_outcome_count / total_sample_count
-
-# Calculate the probability for each of our defined events.
-probability_a = calculate_probability(event_a_count, total_outcomes_count)
-probability_b = calculate_probability(event_b_count, total_outcomes_count)
-probability_c = calculate_probability(event_c_count, total_outcomes_count)
-
-
-# --- 4. Display the Results ---
-
-print("--- Basic Probability Demonstration ---")
-print(f"Experiment: Rolling a single six-sided die.")
-print(f"Sample Space (all possible outcomes): {sorted(list(sample_space))}")
-print(f"Total number of outcomes: {total_outcomes_count}\n")
-
-print("--- Events and Their Probabilities ---\n")
-
-# Display Event A
-print(f"Event A: Rolling an even number.")
-print(f"Outcomes for Event A: {sorted(list(event_a_outcomes))}")
-# The notation P(A) means "the probability of event A".
-print(f"The probability value, P(A), is: {event_a_count}/{total_outcomes_count} = {probability_a:.2f}\n")
-
-# Display Event B
-print(f"Event B: Rolling a number greater than 4.")
-print(f"Outcomes for Event B: {sorted(list(event_b_outcomes))}")
-print(f"The probability value, P(B), is: {event_b_count}/{total_outcomes_count} = {probability_b:.2f}\n")
-
-# Display Event C
-print(f"Event C: Rolling a 3.")
-print(f"Outcomes for Event C: {sorted(list(event_c_outcomes))}")
-print(f"The probability value, P(C), is: {event_c_count}/{total_outcomes_count} = {probability_c:.2f}\n")
-
-
+# Run the main program
+if __name__ == "__main__":
+    main()
